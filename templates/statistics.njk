@@ -1,0 +1,20 @@
+{% if channelInfo  %}
+    <div class="small" style="display: inline-block; background: url({{ channelInfo.snippet.thumbnails["default"].url }}) no-repeat left center; min-height: {{ channelInfo.snippet.thumbnails["default"].height }}px; min-width: {{ channelInfo.snippet.thumbnails["default"].width }}px; padding-left: {{ channelInfo.snippet.thumbnails["default"].width }}px;">
+        <ul class="fa-ul">
+        {% for stat in stats %}
+            {% set statAttribute = [stat, "Count"] | join | replace("sCount", "Count") %}
+            <li data-type="{{ stat }}">
+                <span class="fa-li"><i class="fas fa-{{ stat }} fa-sm"></i></span>
+                <span class="bright">{{ channelInfo.statistics[statAttribute] }}</span>
+                {% if showLabels %}
+                &nbsp;<span class="light">{{ stat }}</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+{% else %}
+    <div class="small dimmed light">
+        {{ 'LOADING' | translate | safe }}
+    </div>
+{% endif %}
