@@ -3,7 +3,7 @@ Module.register("MMM-YouTubeChannelStats", {
 	defaults: {
 		channelId: "",
 		apiKey: "",
-		stats: ["views", "comments", "subscribers", "videos"],
+		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		setHeader: true,
 		showLabels: true,
 		fetchInterval: 3600 * 1000, // 1 hour
