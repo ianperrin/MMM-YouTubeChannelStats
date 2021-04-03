@@ -1,0 +1,49 @@
+{
+	"name": "MMM-YouTubeChannelStats",
+	"version": "1.0.0",
+	"description": "A MagicMirror Module for displaying statistics about a YouTube channel.",
+	"main": "MMM-YouTubeChannelStats.js",
+	"scripts": {
+		"test": "npm run test:prettier && npm run test:js && npm run test:css",
+		"test:unit": "NODE_ENV=test mocha tests --recursive",
+		"test:prettier": "prettier --check **/*.{js,css,json,md,yml}",
+		"test:js": "eslint *.js tests/**/*.js --config .eslintrc.json --quiet",
+		"test:css": "stylelint **/*.css --config .stylelintrc.json",
+		"lint:prettier": "prettier --write **/*.{js,css,json,md,yml}",
+		"lint:js": "eslint *.js tests/**/*.js --config .eslintrc.json --fix",
+		"lint:css": "stylelint **/*.css --config .stylelintrc.json --fix"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ianperrin/MMM-YouTubeChannelStats.git"
+	},
+	"keywords": [
+		"magic",
+		"mirror",
+		"youtube",
+		"channel"
+	],
+	"author": "Ian Perrin",
+	"contributors": [
+		"https://github.com/ianperrin/MMM-YouTubeChannelStats/graphs/contributors"
+	],
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/ianperrin/MMM-YouTubeChannelStats/issues"
+	},
+	"homepage": "https://github.com/ianperrin/MMM-YouTubeChannelStats/#readme",
+	"devDependencies": {
+		"chai": "^4.2.0",
+		"eslint": "^7.15.0",
+		"eslint-config-prettier": "^7.0.0",
+		"eslint-plugin-jsdoc": "^30.7.8",
+		"eslint-plugin-prettier": "^3.2.0",
+		"mocha": "^8.2.1",
+		"module-alias": "^2.2.2",
+		"prettier": "^2.2.1",
+		"stylelint": "^13.8.0",
+		"stylelint-config-prettier": "^8.0.2",
+		"stylelint-config-standard": "^20.0.0",
+		"stylelint-prettier": "^1.1.2"
+	}
+}

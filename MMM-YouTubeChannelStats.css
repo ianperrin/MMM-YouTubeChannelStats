@@ -1,22 +1,22 @@
 .MMM-YouTubeChannelStats .fa-comments::before {
-    content: "\f27a";
+  content: "\f27a";
 }
 .MMM-YouTubeChannelStats .fa-subscribers::before {
-    content: "\f500";
+  content: "\f500";
 }
 .MMM-YouTubeChannelStats .fa-videos::before {
-    content: "\f03d";
+  content: "\f03d";
 }
 .MMM-YouTubeChannelStats .fa-views::before {
-    content: "\f06e";
+  content: "\f06e";
 }
 
 .region .right .MMM-YouTubeChannelStats .fa-ul {
-    padding-right: 2em;
-    padding-left: -2em;
-    margin-left: 1em;
+  padding-right: 2em;
+  padding-left: -2em;
+  margin-left: 1em;
 }
 .region .right .MMM-YouTubeChannelStats .fa-li {
-    right: -2em;
-    left: auto;
+  right: -2em;
+  left: auto;
 }
