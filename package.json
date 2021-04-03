@@ -7,10 +7,10 @@
 		"test": "npm run test:prettier && npm run test:js && npm run test:css",
 		"test:unit": "NODE_ENV=test mocha tests --recursive",
 		"test:prettier": "prettier --check **/*.{js,css,json,md,yml}",
-		"test:js": "eslint *.js tests/**/*.js --config .eslintrc.json --quiet",
+		"test:js": "eslint *.js --config .eslintrc.json --quiet",
 		"test:css": "stylelint **/*.css --config .stylelintrc.json",
 		"lint:prettier": "prettier --write **/*.{js,css,json,md,yml}",
-		"lint:js": "eslint *.js tests/**/*.js --config .eslintrc.json --fix",
+		"lint:js": "eslint *.js --config .eslintrc.json --fix",
 		"lint:css": "stylelint **/*.css --config .stylelintrc.json --fix"
 	},
 	"repository": {
