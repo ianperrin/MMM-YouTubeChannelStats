@@ -4,7 +4,6 @@ Module.register("MMM-YouTubeChannelStats", {
 		channelIds: "",
 		apiKey: "",
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
-		setHeader: true,
 		showLabels: true,
 		fetchInterval: 3600 * 1000, // 1 hour
 		animationSpeed: 2.5 * 1000 // 2.5 seconds
@@ -49,9 +48,6 @@ Module.register("MMM-YouTubeChannelStats", {
 			const responseJson = await response.json();
 			if (responseJson && responseJson.items && responseJson.items.length >= 1) {
 				self.channelData = responseJson.items;
-				if (self.config.setHeader) {
-					self.data.header = self.channelData[0].snippet.title;
-				}
 				self.updateDom(self.config.animationSpeed);
 			}
 		};
