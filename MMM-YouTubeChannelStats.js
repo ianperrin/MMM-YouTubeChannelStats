@@ -8,13 +8,13 @@ Module.register("MMM-YouTubeChannelStats", {
 		fetchInterval: 3600 * 1000, // 1 hour
 		animationSpeed: 2.5 * 1000 // 2.5 seconds
 	},
-
 	start: function () {
 		Log.info("Starting module: " + this.name);
 		// Validate config
 		this.config.channelIds = this.getOrMakeArray(this.config.channelIds || this.config.channelId);
+		this.config.stats = this.config.stats.map((stat) => stat.toLowerCase());
 		// Schedule api calls
-		this.getChannelInfo();
+		this.getChannelsList();
 	},
 	getStyles: function () {
 		return ["font-awesome.css", "MMM-YouTubeChannelStats.css"];
@@ -23,9 +23,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		return "templates\\statistics.njk";
 	},
 	getTemplateData: function () {
-		console.log(this.data.position.includes("_right") ? "right" : "left");
 		return {
-			channelData: this.channelData,
+			channelsList: this.channelsList,
 			config: this.config,
 			position: this.data.position.includes("_right") ? "right" : "left"
 		};
@@ -39,23 +38,22 @@ Module.register("MMM-YouTubeChannelStats", {
 			it: "translations/it.json"
 		};
 	},
-	getChannelInfo: function () {
+	getChannelsList: function () {
 		var self = this;
+		this.getYouTubeChannels();
+		setInterval(function () {
+			self.getYouTubeChannels();
+		}, this.config.fetchInterval);
+	},
+	getYouTubeChannels: async function () {
 		const channelIds = this.config.channelIds.join(",");
 		const channelsEndpoint = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&fields=items/statistics,items/snippet&id=${channelIds}&key=${this.config.apiKey}`;
-		console.log(channelsEndpoint);
-		const callYouTubeApi = async () => {
-			const response = await fetch(channelsEndpoint);
-			const responseJson = await response.json();
-			if (responseJson && responseJson.items && responseJson.items.length >= 1) {
-				self.channelData = responseJson.items;
-				self.updateDom(self.config.animationSpeed);
-			}
-		};
-		callYouTubeApi();
-		setInterval(function () {
-			callYouTubeApi();
-		}, this.config.fetchInterval);
+		const response = await fetch(channelsEndpoint);
+		const responseJson = await response.json();
+		if (responseJson && responseJson.items && responseJson.items.length >= 1) {
+			this.channelsList = responseJson.items;
+			this.updateDom(self.config.animationSpeed);
+		}
 	},
 	getOrMakeArray: function (arrayOrString) {
 		return Array.isArray(arrayOrString) ? arrayOrString : [arrayOrString];

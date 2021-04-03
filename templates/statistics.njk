@@ -1,5 +1,5 @@
-{% if channelData  %}
-    {% for channel in channelData %}
+{% if channelsList  %}
+    {% for channel in channelsList %}
     {% set thumbnail = channel.snippet.thumbnails["default"] %}
     <header class="module-header">{{ channel.snippet.title }}</header>
     <div class="small channel" style="background-image: url({{ thumbnail.url }}); min-height: {{ thumbnail.height }}px; min-width: {{ thumbnail.width }}px; padding-{{ position }}: {{ thumbnail.width }}px;">
