@@ -1,18 +1,21 @@
-{% if channelInfo  %}
-    <div class="small" style="display: inline-block; background: url({{ channelInfo.snippet.thumbnails["default"].url }}) no-repeat left center; min-height: {{ channelInfo.snippet.thumbnails["default"].height }}px; min-width: {{ channelInfo.snippet.thumbnails["default"].width }}px; padding-left: {{ channelInfo.snippet.thumbnails["default"].width }}px;">
+{% if channelData  %}
+    {% for channel in channelData %}
+    <header class="module-header">{{ channel.snippet.title }}</header>
+    <div class="small channel" style="background: url({{ channel.snippet.thumbnails["default"].url }}) no-repeat left center; min-height: {{ channel.snippet.thumbnails["default"].height }}px; min-width: {{ channel.snippet.thumbnails["default"].width }}px; padding-left: {{ channel.snippet.thumbnails["default"].width }}px;">
         <ul class="fa-ul">
-        {% for stat in stats %}
+        {% for stat in config.stats %}
             {% set statAttribute = [stat, "Count"] | join | replace("sCount", "Count") %}
             <li data-type="{{ stat }}">
                 <span class="fa-li"><i class="fas fa-{{ stat }} fa-sm"></i></span>
-                <span class="bright">{{ channelInfo.statistics[statAttribute] }}</span>
-                {% if showLabels %}
+                <span class="bright">{{ channel.statistics[statAttribute] }}</span>
+                {% if config.showLabels %}
                 &nbsp;<span class="light">{{ stat | upper | translate }}</span>
                 {% endif %}
             </li>
         {% endfor %}
         </ul>
     </div>
+    {% endfor %}
 {% else %}
     <div class="small dimmed light">
         {{ 'LOADING' | translate | safe }}

@@ -1,7 +1,7 @@
 Module.register("MMM-YouTubeChannelStats", {
 	// Default module config.
 	defaults: {
-		channelId: "",
+		channelIds: "",
 		apiKey: "",
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		setHeader: true,
@@ -13,7 +13,7 @@ Module.register("MMM-YouTubeChannelStats", {
 	start: function () {
 		Log.info("Starting module: " + this.name);
 		// Validate config
-		//todo
+		this.config.channelIds = this.getOrMakeArray(this.config.channelIds || this.config.channelId);
 		// Schedule api calls
 		this.getChannelInfo();
 	},
@@ -24,10 +24,10 @@ Module.register("MMM-YouTubeChannelStats", {
 		return "templates\\statistics.njk";
 	},
 	getTemplateData: function () {
+		console.log(this.channelData);
 		return {
-			channelInfo: this.channelInfo,
-			stats: this.config.stats,
-			showLabels: this.config.showLabels
+			channelData: this.channelData,
+			config: this.config
 		};
 	},
 	getTranslations: function () {
@@ -41,16 +41,16 @@ Module.register("MMM-YouTubeChannelStats", {
 	},
 	getChannelInfo: function () {
 		var self = this;
-
-		const channelsEndpoint = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&fields=items/statistics,items/snippet&id=${this.config.channelId}&key=${this.config.apiKey}`;
+		const channelIds = this.config.channelIds.join(",");
+		const channelsEndpoint = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&fields=items/statistics,items/snippet&id=${channelIds}&key=${this.config.apiKey}`;
 		console.log(channelsEndpoint);
 		const callYouTubeApi = async () => {
 			const response = await fetch(channelsEndpoint);
 			const responseJson = await response.json();
 			if (responseJson && responseJson.items && responseJson.items.length >= 1) {
-				self.channelInfo = responseJson.items[0];
+				self.channelData = responseJson.items;
 				if (self.config.setHeader) {
-					self.data.header = self.channelInfo.snippet.title;
+					self.data.header = self.channelData[0].snippet.title;
 				}
 				self.updateDom(self.config.animationSpeed);
 			}
@@ -59,5 +59,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		setInterval(function () {
 			callYouTubeApi();
 		}, this.config.fetchInterval);
+	},
+	getOrMakeArray: function (arrayOrString) {
+		return Array.isArray(arrayOrString) ? arrayOrString : [arrayOrString];
 	}
 });
