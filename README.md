@@ -35,7 +35,7 @@ A MagicMirror Module for displaying statistics about a YouTube channel.
        module: "MMM-YouTubeChannelStats",
        position: "top_right",
        config: {
-         channelId: "your_youtube_channel_id",
+         channelIds: ["your_youtube_channel_id", "another_youtube_channel_id"],
          apiKey: "your_google_api_key"
        }
      }
