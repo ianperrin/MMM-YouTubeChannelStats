@@ -1,7 +1,8 @@
 {% if channelData  %}
     {% for channel in channelData %}
+    {% set thumbnail = channel.snippet.thumbnails["default"] %}
     <header class="module-header">{{ channel.snippet.title }}</header>
-    <div class="small channel" style="background: url({{ channel.snippet.thumbnails["default"].url }}) no-repeat left center; min-height: {{ channel.snippet.thumbnails["default"].height }}px; min-width: {{ channel.snippet.thumbnails["default"].width }}px; padding-left: {{ channel.snippet.thumbnails["default"].width }}px;">
+    <div class="small channel" style="background-image: url({{ thumbnail.url }}); min-height: {{ thumbnail.height }}px; min-width: {{ thumbnail.width }}px; padding-{{ position }}: {{ thumbnail.width }}px;">
         <ul class="fa-ul">
         {% for stat in config.stats %}
             {% set statAttribute = [stat, "Count"] | join | replace("sCount", "Count") %}

@@ -23,10 +23,11 @@ Module.register("MMM-YouTubeChannelStats", {
 		return "templates\\statistics.njk";
 	},
 	getTemplateData: function () {
-		console.log(this.channelData);
+		console.log(this.data.position.includes("_right") ? "right" : "left");
 		return {
 			channelData: this.channelData,
-			config: this.config
+			config: this.config,
+			position: this.data.position.includes("_right") ? "right" : "left"
 		};
 	},
 	getTranslations: function () {
