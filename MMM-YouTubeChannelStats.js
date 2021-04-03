@@ -30,10 +30,20 @@ Module.register("MMM-YouTubeChannelStats", {
 			showLabels: this.config.showLabels
 		};
 	},
+	getTranslations: function () {
+		return {
+			en: "translations/en.json",
+			de: "translations/de.json",
+			es: "translations/es.json",
+			fr: "translations/fr.json",
+			it: "translations/it.json"
+		};
+	},
 	getChannelInfo: function () {
 		var self = this;
 
 		const channelsEndpoint = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&fields=items/statistics,items/snippet&id=${this.config.channelId}&key=${this.config.apiKey}`;
+		console.log(channelsEndpoint);
 		const callYouTubeApi = async () => {
 			const response = await fetch(channelsEndpoint);
 			const responseJson = await response.json();

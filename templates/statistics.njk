@@ -7,7 +7,7 @@
                 <span class="fa-li"><i class="fas fa-{{ stat }} fa-sm"></i></span>
                 <span class="bright">{{ channelInfo.statistics[statAttribute] }}</span>
                 {% if showLabels %}
-                &nbsp;<span class="light">{{ stat }}</span>
+                &nbsp;<span class="light">{{ stat | upper | translate }}</span>
                 {% endif %}
             </li>
         {% endfor %}
