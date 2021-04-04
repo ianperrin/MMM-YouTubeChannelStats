@@ -55,7 +55,10 @@ Module.register("MMM-YouTubeChannelStats", {
 			this.updateDom(self.config.animationSpeed);
 		}
 	},
-	getOrMakeArray: function (arrayOrString) {
-		return Array.isArray(arrayOrString) ? arrayOrString : [arrayOrString];
+	getOrMakeArray: function (values) {
+		if (!Array.isArray(values)) {
+			values = values.split(",").map((value) => value.trim());
+		}
+		return values;
 	}
 });
