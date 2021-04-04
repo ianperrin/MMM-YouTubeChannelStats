@@ -35,7 +35,7 @@ A MagicMirror Module for displaying statistics about a YouTube channel.
        module: "MMM-YouTubeChannelStats",
        position: "top_right",
        config: {
-         channelIds: ["your_youtube_channel_id", "another_youtube_channel_id"],
+         channelIds: "your_youtube_channel_id,another_youtube_channel_id",
          apiKey: "your_google_api_key"
        }
      }
@@ -71,11 +71,11 @@ To update the module to the latest version,
 
 The following properties can be added to the configuration:
 
-| **Option**       | **Default**                                      | **Description**                                                                                                                                                                                                              | **Possible Values**              |
-| ---------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `channelIds`     |                                                  | The YouTube channel id or ids. _Note:_ Multiple channel ids can be entered as a comma separated list (e.g. `"id1,id2"`) or an array of strings (e.g. `["id1", "id2"]`)                                                       |                                  |
-| `apiKey`         |                                                  | The YouTube API key                                                                                                                                                                                                          |                                  |
-| `stats`          | `["views", "comments", "subscribers", "videos"]` | _Optional_ - Which statistics to display. _Note:_ - The stats can be listed in any order, and only one is required. However, they must be entered as an array of strings i.e. comma separated values within square brackets. | `views`, `subscribers`, `videos` |
-| `showLabels`     | `true`                                           | _Optional_ - Display labels next to the statistics                                                                                                                                                                           | `true` or `false`                |
-| `fetchInterval`  | `3600 * 1000` (1 hour)                           | _Optional_ - How often the statistics should be fetched (in milliseconds)                                                                                                                                                    | `1000` - `86400000`              |
-| `animationSpeed` | `2.5 * 1000` (2.5 seconds)                       | _Optional_ - The speed of the update animation (in milliseconds)                                                                                                                                                             | `0` - `5000`                     |
+| **Option**       | **Default**                          | **Description**                                                                                                                                                                                                              | **Possible Values**              |
+| ---------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `channelIds`     |                                      | The YouTube channel id or ids. _Note:_ Multiple channel ids can be entered as a comma separated list (e.g. `"id1,id2"`) or an array of strings (e.g. `["id1", "id2"]`)                                                       |                                  |
+| `apiKey`         |                                      | The YouTube API key                                                                                                                                                                                                          |                                  |
+| `stats`          | `["views", "subscribers", "videos"]` | _Optional_ - Which statistics to display. _Note:_ - The stats can be listed in any order, and only one is required. However, they must be entered as an array of strings i.e. comma separated values within square brackets. | `views`, `subscribers`, `videos` |
+| `showLabels`     | `true`                               | _Optional_ - Display labels next to the statistics                                                                                                                                                                           | `true` or `false`                |
+| `fetchInterval`  | `3600 * 1000` (1 hour)               | _Optional_ - How often the statistics should be fetched (in milliseconds)                                                                                                                                                    | `1000` - `86400000`              |
+| `animationSpeed` | `2.5 * 1000` (2.5 seconds)           | _Optional_ - The speed of the update animation (in milliseconds)                                                                                                                                                             | `0` - `5000`                     |
