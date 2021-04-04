@@ -5,7 +5,9 @@ Module.register("MMM-YouTubeChannelStats", {
 		apiKey: "",
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		showLabels: true,
+		pageSize: 0,
 		fetchInterval: 3600 * 1000, // 1 hour
+		rotateInterval: 10 * 1000, // 10 seconds
 		animationSpeed: 2.5 * 1000 // 2.5 seconds
 	},
 	start: function () {
@@ -13,6 +15,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		// Validate config
 		this.config.channelIds = this.getOrMakeArray(this.config.channelIds || this.config.channelId);
 		this.config.stats = this.config.stats.map((stat) => stat.toLowerCase());
+		// Enable rotation if pageSize is set and is greater than the number of channels
+		this.config.enableRotation = this.config.pageSize > 0 && this.config.pageSize < this.config.channelIds.length;
 		// Schedule api calls
 		this.getChannelsList();
 	},
@@ -23,8 +27,12 @@ Module.register("MMM-YouTubeChannelStats", {
 		return "templates\\statistics.njk";
 	},
 	getTemplateData: function () {
+		if (this.config.enableRotation && this.channelsList) {
+			this.currentPage = this.currentPagedChannels ? this.currentPagedChannels.nextPage : 1;
+			this.currentPagedChannels = this.paginate(this.channelsList, this.currentPage, this.config.pageSize);
+		}
 		return {
-			channelsList: this.channelsList,
+			channelsList: this.currentPagedChannels ? this.currentPagedChannels.items : this.channelsList,
 			config: this.config,
 			position: this.data.position.includes("_right") ? "right" : "left"
 		};
@@ -41,9 +49,16 @@ Module.register("MMM-YouTubeChannelStats", {
 	getChannelsList: function () {
 		var self = this;
 		this.getYouTubeChannels();
+		// Fetch Interval
 		setInterval(function () {
 			self.getYouTubeChannels();
 		}, this.config.fetchInterval);
+		// Rotate Interval
+		if (this.config.enableRotation) {
+			setInterval(function () {
+				self.updateDom(self.config.animationSpeed);
+			}, this.config.rotateInterval);
+		}
 	},
 	getYouTubeChannels: async function () {
 		const channelIds = this.config.channelIds.join(",");
@@ -52,7 +67,7 @@ Module.register("MMM-YouTubeChannelStats", {
 		const responseJson = await response.json();
 		if (responseJson && responseJson.items && responseJson.items.length >= 1) {
 			this.channelsList = responseJson.items;
-			this.updateDom(self.config.animationSpeed);
+			this.updateDom(this.config.animationSpeed);
 		}
 	},
 	getOrMakeArray: function (values) {
@@ -60,5 +75,17 @@ Module.register("MMM-YouTubeChannelStats", {
 			values = values.split(",").map((value) => value.trim());
 		}
 		return values;
+	},
+	paginate: function (items, page = 1, perPage = 10) {
+		const offset = perPage * (page - 1);
+		const totalPages = Math.ceil(items.length / perPage);
+		const paginatedItems = items.slice(offset, perPage * page);
+		return {
+			previousPage: page - 1 ? page - 1 : totalPages,
+			nextPage: totalPages > page ? page + 1 : 1,
+			total: items.length,
+			totalPages: totalPages,
+			items: paginatedItems
+		};
 	}
 });
