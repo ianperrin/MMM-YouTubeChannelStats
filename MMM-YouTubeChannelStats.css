@@ -3,6 +3,10 @@
   background-position-y: center;
   background-position-x: left;
 }
+.MMM-YouTubeChannelStats div.channel.grayscale {
+  background-color: #000;
+  background-blend-mode: luminosity;
+}
 .MMM-YouTubeChannelStats .fa-comments::before {
   content: "\f27a";
 }

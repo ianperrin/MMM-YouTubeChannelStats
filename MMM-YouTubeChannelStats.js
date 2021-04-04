@@ -5,6 +5,7 @@ Module.register("MMM-YouTubeChannelStats", {
 		apiKey: "",
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		showLabels: true,
+		grayscale: true,
 		pageSize: 0,
 		fetchInterval: 3600 * 1000, // 1 hour
 		rotateInterval: 10 * 1000, // 10 seconds
