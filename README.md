@@ -10,7 +10,7 @@ A MagicMirror Module for displaying statistics about YouTube channels.
 
 ## Example
 
-![Example screenshot](.github/example.png)
+![Example screenshot](.github/example.gif)
 
 ## Installation
 
