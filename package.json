@@ -1,6 +1,6 @@
 {
 	"name": "MMM-YouTubeChannelStats",
-	"version": "1.3.0",
+	"version": "1.4.0-develop",
 	"description": "A MagicMirror Module for displaying statistics about a YouTube channel.",
 	"main": "MMM-YouTubeChannelStats.js",
 	"scripts": {
