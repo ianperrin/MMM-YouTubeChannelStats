@@ -6,7 +6,7 @@ Module.register("MMM-YouTubeChannelStats", {
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		showLabels: true,
 		grayscale: true,
-		pageSize: 0,
+		maximumChannels: 0,
 		fetchInterval: 3600 * 1000, // 1 hour
 		rotateInterval: 10 * 1000, // 10 seconds
 		animationSpeed: 2.5 * 1000 // 2.5 seconds
@@ -16,8 +16,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		// Validate config
 		this.config.channelIds = this.getOrMakeArray(this.config.channelIds || this.config.channelId);
 		this.config.stats = this.config.stats.map((stat) => stat.toLowerCase());
-		// Enable rotation if pageSize is set and is greater than the number of channels
-		this.config.enableRotation = this.config.pageSize > 0 && this.config.pageSize < this.config.channelIds.length;
+		// Enable rotation if maximumChannels is set and is greater than the number of channels
+		this.config.enableRotation = this.config.maximumChannels > 0 && this.config.maximumChannels < this.config.channelIds.length;
 		// Add custom nunjucks filters
 		this.addFilters();
 		// Schedule api calls
@@ -32,7 +32,7 @@ Module.register("MMM-YouTubeChannelStats", {
 	getTemplateData: function () {
 		if (this.config.enableRotation && this.channelsList) {
 			this.currentPage = this.currentPagedChannels ? this.currentPagedChannels.nextPage : 1;
-			this.currentPagedChannels = this.paginate(this.channelsList, this.currentPage, this.config.pageSize);
+			this.currentPagedChannels = this.paginate(this.channelsList, this.currentPage, this.config.maximumChannels);
 		}
 		return {
 			channelsList: this.currentPagedChannels ? this.currentPagedChannels.items : this.channelsList,
