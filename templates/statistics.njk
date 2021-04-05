@@ -10,7 +10,7 @@
                 <span class="fa-li"><i class="fas fa-{{ stat }} fa-sm"></i></span>
                 <span class="bright">{{ channel.statistics[statAttribute] | toMetric }}</span>
                 {% if config.showLabels %}
-                &nbsp;<span class="light">{{ stat | upper | translate }}</span>
+                <span class="light">{{ stat | upper | translate }}</span>
                 {% endif %}
             </li>
         {% endfor %}
