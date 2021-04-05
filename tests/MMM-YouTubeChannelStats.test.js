@@ -44,4 +44,30 @@ describe(`Functions in ${moduleName}.js`, function () {
 			});
 		});
 	});
+	describe("toMetric", function () {
+		const numbers = {
+			"-12": { return: "-12" },
+			0: { return: "0" },
+			1: { return: "1" },
+			12: { return: "12" },
+			123: { return: "123" },
+			1234: { return: "1.23K" },
+			12345: { return: "12.3K" },
+			123456: { return: "123K" },
+			1234567: { return: "1.23M" },
+			12345678: { return: "12.3M" },
+			123456789: { return: "123M" },
+			1230: { return: "1.23K" },
+			12300: { return: "12.3K" },
+			123000: { return: "123K" },
+			1230000: { return: "1.23M" },
+			12300000: { return: "12.3M" },
+			123000000: { return: "123M" }
+		};
+		Object.keys(numbers).forEach((num) => {
+			it(`for '${num}' should return [${numbers[num].return}]`, function () {
+				expect(Module.definitions[moduleName].toMetric(num)).to.eql(numbers[num].return);
+			});
+		});
+	});
 });

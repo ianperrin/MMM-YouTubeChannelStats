@@ -18,6 +18,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		this.config.stats = this.config.stats.map((stat) => stat.toLowerCase());
 		// Enable rotation if pageSize is set and is greater than the number of channels
 		this.config.enableRotation = this.config.pageSize > 0 && this.config.pageSize < this.config.channelIds.length;
+		// Add custom nunjucks filters
+		this.addFilters();
 		// Schedule api calls
 		this.getChannelsList();
 	},
@@ -46,6 +48,10 @@ Module.register("MMM-YouTubeChannelStats", {
 			fr: "translations/fr.json",
 			it: "translations/it.json"
 		};
+	},
+	addFilters() {
+		var env = this.nunjucksEnvironment();
+		env.addFilter("toMetric", this.toMetric.bind(this));
 	},
 	getChannelsList: function () {
 		var self = this;
@@ -88,5 +94,19 @@ Module.register("MMM-YouTubeChannelStats", {
 			totalPages: totalPages,
 			items: paginatedItems
 		};
+	},
+	toMetric: function (input) {
+		// see humanizer.node MetricNumerals
+		if (input <= 0) {
+			return input.toString();
+		}
+		const symbol = ["", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+		const exponent = Math.floor(Math.log10(Math.abs(input)) / 3);
+		if (exponent !== 0) {
+			let number = input * Math.pow(1000, -exponent);
+			let digits = 3 - Math.round(number).toString().length;
+			return number.toFixed(digits) + symbol[exponent];
+		}
+		return Math.round(input).toString();
 	}
 });

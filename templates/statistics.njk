@@ -8,7 +8,7 @@
             {% set statAttribute = [stat, "Count"] | join | replace("sCount", "Count") %}
             <li data-type="{{ stat }}">
                 <span class="fa-li"><i class="fas fa-{{ stat }} fa-sm"></i></span>
-                <span class="bright">{{ channel.statistics[statAttribute] }}</span>
+                <span class="bright">{{ channel.statistics[statAttribute] | toMetric }}</span>
                 {% if config.showLabels %}
                 &nbsp;<span class="light">{{ stat | upper | translate }}</span>
                 {% endif %}
