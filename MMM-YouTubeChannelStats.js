@@ -79,7 +79,7 @@ Module.register("MMM-YouTubeChannelStats", {
 	},
 	getOrMakeArray: function (values) {
 		if (!Array.isArray(values)) {
-			values = values.split(",").map((value) => value.trim());
+			values = !values ? [] : values.split(",").map((value) => value.trim());
 		}
 		return values;
 	},

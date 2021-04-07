@@ -8,10 +8,11 @@
 		"test:unit": "NODE_ENV=test mocha tests --recursive",
 		"test:prettier": "prettier --check **/*.{js,css,json,md,yml}",
 		"test:js": "eslint *.js tests/**/*.js  --config .eslintrc.json --quiet",
-		"test:css": "stylelint **/*.css --config .stylelintrc.json",
+		"test:css": "stylelint *.css --config .stylelintrc.json",
+		"test:coverage": "NODE_ENV=test nyc --reporter=lcov --reporter=text mocha tests --recursive --timeout=3000",
 		"lint:prettier": "prettier --write **/*.{js,css,json,md,yml}",
 		"lint:js": "eslint *.js tests/**/*.js  --config .eslintrc.json --fix",
-		"lint:css": "stylelint **/*.css --config .stylelintrc.json --fix"
+		"lint:css": "stylelint *.css --config .stylelintrc.json --fix"
 	},
 	"repository": {
 		"type": "git",
@@ -40,6 +41,7 @@
 		"eslint-plugin-prettier": "^3.2.0",
 		"mocha": "^8.2.1",
 		"module-alias": "^2.2.2",
+		"nyc": "^15.1.0",
 		"prettier": "^2.2.1",
 		"stylelint": "^13.8.0",
 		"stylelint-config-prettier": "^8.0.2",

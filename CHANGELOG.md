@@ -7,7 +7,12 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Code coverage support (`npm run test:coverage`)
+- Unit test coverage for inherited functions in the core module file.
+
 ### Updated
+
+- `getOrMakeArray` function now returns an empty array when passed a zero length string
 
 ### Removed
 
