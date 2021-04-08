@@ -9,7 +9,10 @@ Module.register("MMM-YouTubeChannelStats", {
 		maximumChannels: 0,
 		fetchInterval: 3600 * 1000, // 1 hour
 		rotateInterval: 10 * 1000, // 10 seconds
-		animationSpeed: 2.5 * 1000 // 2.5 seconds
+		animationSpeed: 2.5 * 1000, // 2.5 seconds
+		apiBase: "https://www.googleapis.com/youtube/",
+		apiVersion: "v3",
+		apiEndpoint: "channels"
 	},
 	start: function () {
 		Log.info("Starting module: " + this.name);
@@ -17,11 +20,11 @@ Module.register("MMM-YouTubeChannelStats", {
 		this.config.channelIds = this.getOrMakeArray(this.config.channelIds || this.config.channelId);
 		this.config.stats = this.config.stats.map((stat) => stat.toLowerCase());
 		// Enable rotation if maximumChannels is set and is greater than the number of channels
-		this.config.enableRotation = this.config.maximumChannels > 0 && this.config.maximumChannels < this.config.channelIds.length;
+		this.config.enableRotate = this.config.maximumChannels > 0 && this.config.maximumChannels < this.config.channelIds.length;
 		// Add custom nunjucks filters
 		this.addFilters();
-		// Schedule api calls
-		this.getChannelsList();
+		// Schedule the update.
+		this.scheduleUpdate();
 	},
 	getStyles: function () {
 		return ["font-awesome.css", "MMM-YouTubeChannelStats.css"];
@@ -30,12 +33,8 @@ Module.register("MMM-YouTubeChannelStats", {
 		return "templates\\statistics.njk";
 	},
 	getTemplateData: function () {
-		if (this.config.enableRotation && this.channelsList) {
-			this.currentPage = this.currentPagedChannels ? this.currentPagedChannels.nextPage : 1;
-			this.currentPagedChannels = this.paginate(this.channelsList, this.currentPage, this.config.maximumChannels);
-		}
 		return {
-			channelsList: this.currentPagedChannels ? this.currentPagedChannels.items : this.channelsList,
+			channelsList: this.currentChannelList ? this.currentChannelList.items : this.channelsList,
 			config: this.config,
 			position: this.data.position.includes("_right") ? "right" : "left"
 		};
@@ -53,37 +52,63 @@ Module.register("MMM-YouTubeChannelStats", {
 		var env = this.nunjucksEnvironment();
 		env.addFilter("toMetric", this.toMetric.bind(this));
 	},
-	getChannelsList: function () {
-		var self = this;
-		this.getYouTubeChannels();
-		// Fetch Interval
-		setInterval(function () {
-			self.getYouTubeChannels();
+	scheduleUpdate: function () {
+		// fetch data from API
+		this.fetchData();
+		setInterval(() => {
+			this.fetchData();
 		}, this.config.fetchInterval);
-		// Rotate Interval
-		if (this.config.enableRotation) {
-			setInterval(function () {
-				self.updateDom(self.config.animationSpeed);
+	},
+	scheduleRotate: function () {
+		// rotate data in module
+		if (this.config.enableRotate) {
+			this.rotationInterval = setInterval(() => {
+				this.rotateData();
 			}, this.config.rotateInterval);
 		}
 	},
-	getYouTubeChannels: async function () {
-		const channelIds = this.config.channelIds.join(",");
-		const channelsEndpoint = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&fields=items/statistics,items/snippet&id=${channelIds}&key=${this.config.apiKey}`;
-		const response = await fetch(channelsEndpoint);
-		const responseJson = await response.json();
-		if (responseJson && responseJson.items && responseJson.items.length >= 1) {
-			this.channelsList = responseJson.items;
-			this.updateDom(this.config.animationSpeed);
+	fetchData: function () {
+		if (this.config.apiKey === "") {
+			Log.error(this.identifier, "apiKey not set.");
+			return;
+		}
+		clearInterval(this.rotationInterval);
+		const url = this.config.apiBase + this.config.apiVersion + "/" + this.config.apiEndpoint + this.getParams();
+		fetch(url)
+			.then((response) => response.json())
+			.then((data) => this.processData(data))
+			.catch((error) => Log.error(this.identifier, "Error:", error));
+	},
+	getParams: function () {
+		let params = "?";
+		if (this.config.channelIds) {
+			params += "id=" + this.config.channelIds.join(",");
+		}
+		params += "&part=snippet,statistics";
+		params += "&fields=items/statistics,items/snippet";
+		params += "&key=" + this.config.apiKey;
+		return params;
+	},
+	processData: function (data) {
+		try {
+			// Handle known errors
+			// see https://developers.google.com/youtube/v3/docs/errors#channels_youtube.channels.list
+			if (data.error) {
+				throw data.error.message;
+			}
+			// Process data
+			this.channelsList = data.items;
+			if (this.config.enableRotate) {
+				this.rotateData();
+				this.scheduleRotate();
+			} else {
+				this.updateDom(this.config.animationSpeed);
+			}
+		} catch (error) {
+			throw "Unable to process data: " + error;
 		}
 	},
-	getOrMakeArray: function (values) {
-		if (!Array.isArray(values)) {
-			values = !values ? [] : values.split(",").map((value) => value.trim());
-		}
-		return values;
-	},
-	paginate: function (items, page = 1, perPage = 10) {
+	paginateData: function (items, page = 1, perPage = 10) {
 		const offset = perPage * (page - 1);
 		const totalPages = Math.ceil(items.length / perPage);
 		const paginatedItems = items.slice(offset, perPage * page);
@@ -94,6 +119,19 @@ Module.register("MMM-YouTubeChannelStats", {
 			totalPages: totalPages,
 			items: paginatedItems
 		};
+	},
+	rotateData: function () {
+		if (this.config.enableRotate && this.channelsList) {
+			this.currentPage = this.currentChannelList ? this.currentChannelList.nextPage : 1;
+			this.currentChannelList = this.paginateData(this.channelsList, this.currentPage, this.config.maximumChannels);
+		}
+		this.updateDom(this.config.animationSpeed);
+	},
+	getOrMakeArray: function (values) {
+		if (!Array.isArray(values)) {
+			values = !values ? [] : values.split(",").map((value) => value.trim());
+		}
+		return values;
 	},
 	toMetric: function (input) {
 		// see humanizer.node MetricNumerals
