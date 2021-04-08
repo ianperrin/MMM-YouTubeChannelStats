@@ -4,16 +4,16 @@ name: Coverage
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [master, develop]
   pull_request:
-    branches: [ master, develop ]
+    branches: [master, develop]
 
 jobs:
   run-and-upload-coverage-report:
     strategy:
       matrix:
-        node-version: [ 14.x ]
-        platform: [ ubuntu-latest ]
+        node-version: [14.x]
+        platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -49,5 +49,5 @@ jobs:
 
       - uses: codecov/codecov-action@v1
         with:
-          file: ./coverage/lcov.info
+          file: MagicMirror/modules/MMM-YouTubeChannelStats/coverage/lcov.info
           fail_ci_if_error: true
