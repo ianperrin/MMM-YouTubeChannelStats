@@ -1,23 +1,34 @@
 const expect = require("chai").expect;
+const sinon = require("sinon");
 const moduleAlias = require("module-alias");
 moduleAlias.addAliases({ logger: "../../../js/logger.js" });
 global.Log = require("logger");
+global.fetch = require("node-fetch");
 const moduleName = "MMM-YouTubeChannelStats";
 
 describe(`Functions in ${moduleName}.js`, function () {
 	Module = {};
 	Module.definitions = {};
 	Module.register = function (name, moduleDefinition) {
-		console.log(name);
 		Module.definitions[name] = moduleDefinition;
+	};
+	const channelIds = {
+		channelid1: { return: ["channelid1"] },
+		"channelid1,channelid2": { return: ["channelid1", "channelid2"] },
+		"channelid1, channelid2": { return: ["channelid1", "channelid2"] }
 	};
 	before(function () {
 		require(`../${moduleName}.js`);
 		Module.definitions[moduleName].name = moduleName;
+		Module.definitions[moduleName].identifier = "module_1_" + moduleName;
 		Module.definitions[moduleName].nunjucksEnvironment = function () {
 			return { addFilter: function () {} };
 		};
-		Module.definitions[moduleName].getChannelsList = function () {};
+		Module.definitions[moduleName].updateDom = function () {};
+		Module.clock = sinon.useFakeTimers(Date.now());
+	});
+	after(function () {
+		Module.clock = sinon.restore();
 	});
 	describe("start", function () {
 		let moduleConfig = {};
@@ -28,6 +39,7 @@ describe(`Functions in ${moduleName}.js`, function () {
 			before(function () {
 				Module.definitions[moduleName].start();
 				moduleConfig = Module.definitions[moduleName].config;
+				Module.clock.tick(moduleConfig.fetchInterval + 1);
 			});
 			it("channelIds should be an array with a length of 0", function () {
 				expect(moduleConfig.channelIds).to.be.an("array").with.a.lengthOf(0);
@@ -35,24 +47,26 @@ describe(`Functions in ${moduleName}.js`, function () {
 			it("stats should be an array with a length of 2", function () {
 				expect(moduleConfig.stats).to.be.an("array").with.a.lengthOf(3);
 			});
-			it("enableRotation should be false", function () {
-				expect(moduleConfig.enableRotation).to.be.false;
+			it("enableRotate should be false", function () {
+				expect(moduleConfig.enableRotate).to.be.false;
 			});
 		});
 		describe("for custom config", function () {
 			before(function () {
-				Module.definitions[moduleName].config.channelIds = "fsdfg,sdg";
+				Module.definitions[moduleName].config.channelIds = Object.keys(channelIds)[1];
+				Module.definitions[moduleName].config.maximumChannels = 1;
 				Module.definitions[moduleName].start();
 				moduleConfig = Module.definitions[moduleName].config;
+				Module.clock.tick(moduleConfig.fetchInterval);
 			});
-			it("channelIds should be an array with a length of 3", function () {
+			it("channelIds should be an array with a length of 2", function () {
 				expect(moduleConfig.channelIds).to.be.an("array").that.has.a.lengthOf(2);
 			});
 			it("stats should be an array with a length of 2", function () {
 				expect(Module.definitions[moduleName].config.stats).to.be.an("array").that.has.a.lengthOf(3);
 			});
-			it("enableRotation should be false", function () {
-				expect(moduleConfig.enableRotation).to.be.false;
+			it("enableRotate should be true", function () {
+				expect(moduleConfig.enableRotate).to.be.true;
 			});
 		});
 	});
@@ -96,24 +110,85 @@ describe(`Functions in ${moduleName}.js`, function () {
 			const expectedKeysForTranslationFiles = translationFiles.map((translationFile) => translationFile.split(".")[0]);
 			expect(translations).to.have.keys(expectedKeysForTranslationFiles);
 		});
-		it(`to have translation files for each translation key`, function () {
+		it(`to have translation files for each translation key`, async function () {
 			const expectedFilesForTranslationKeys = Object.keys(translations).map((translationKey) => translations[translationKey].split("/")[1]);
 			expect(translationFiles).to.have.members(expectedFilesForTranslationKeys);
 		});
 	});
+	describe("fetchData", function () {
+		it(`for missing 'apiKey' to be undefined`, function () {
+			Module.definitions[moduleName].config.apiKey = "";
+			expect(Module.definitions[moduleName].fetchData()).to.be.undefined;
+		});
+		it(`for invalid 'apiKey' to be undefined`, function () {
+			Module.definitions[moduleName].config.apiKey = "blah";
+			//			expect(Module.definitions[moduleName].fetchData()).to.be.undefined;
+		});
+	});
+	describe("getParams", function () {
+		Object.keys(channelIds).forEach((channelId) => {
+			it(`for '${channelId}' params contains '${channelId.replace(" ", "")}'`, function () {
+				Module.definitions[moduleName].config.channelIds = channelIds[channelId].return;
+				expect(Module.definitions[moduleName].getParams()).contains("?id=" + channelId.replace(" ", ""));
+			});
+		});
+	});
+	describe("processData", function () {
+		it(`for 'valid responses' should set 'channelsList'`, function () {
+			const validResponse = {
+				status: 200,
+				json: function () {
+					return { items: ["channel1", "channel2"] };
+				}
+			};
+			Module.definitions[moduleName].config.enableRotate = false;
+			Module.definitions[moduleName].processData(validResponse.json());
+			expect(Module.definitions[moduleName].channelsList).to.eql(validResponse.json().items);
+		});
+		it(`for 'valid responses' with rotation should set 'channelsList' and 'currentChannelList'`, function () {
+			const validResponse = {
+				status: 200,
+				json: function () {
+					return { items: ["channel1", "channel2"] };
+				}
+			};
+			Module.definitions[moduleName].config.enableRotate = true;
+			Module.definitions[moduleName].config.maximumChannels = 1;
+			Module.definitions[moduleName].processData(validResponse.json());
+			Module.clock.tick(Module.definitions[moduleName].config.rotateInterval);
+			expect(Module.definitions[moduleName].channelsList).to.eql(validResponse.json().items);
+			expect(Module.definitions[moduleName].currentChannelList.items).to.eql(validResponse.json().items.slice(1));
+		});
+		it(`for 'badRequest' should throw error`, function () {
+			const badRequest = {
+				status: 403,
+				json: function () {
+					return { error: { message: "badRequest" } };
+				}
+			};
+			expect(() => Module.definitions[moduleName].processData(badRequest.json())).to.throw("Unable to process data: badRequest");
+		});
+	});
+	describe("paginateData", function () {
+		const arrays = [["ch1"], ["ch1", "ch2"], ["ch1", "ch2", "ch3"], ["ch1", "ch2", "ch3", "ch4"], ["ch1", "ch2", "ch3", "ch4", "ch5"], ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6"], ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7"]];
+		arrays.forEach((array) => {
+			describe(`for [${array}]`, function () {
+				[1, 2, 3, 4, 5, 6].forEach((perPage) => {
+					it(`using ${perPage} per page, page 1 should return [${array.slice(0, perPage)}]`, function () {
+						expect(Module.definitions[moduleName].paginateData(array, 1, perPage).items).to.eql(array.slice(0, perPage));
+					});
+				});
+			});
+		});
+	});
 	describe("getOrMakeArray", function () {
 		describe("when the input is a string", function () {
-			const strings = {
-				channelid1: { return: ["channelid1"] },
-				"channelid1,channelid2": { return: ["channelid1", "channelid2"] },
-				"channelid1, channelid2": { return: ["channelid1", "channelid2"] }
-			};
 			it(`for '' should return an array with a length of 0`, function () {
 				expect(Module.definitions[moduleName].getOrMakeArray("")).to.be.an("array").with.a.lengthOf(0);
 			});
-			Object.keys(strings).forEach((string) => {
-				it(`for '${string}' should return [${strings[string].return}]`, function () {
-					expect(Module.definitions[moduleName].getOrMakeArray(string)).to.eql(strings[string].return);
+			Object.keys(channelIds).forEach((channelId) => {
+				it(`for '${channelId}' should return [${channelIds[channelId].return}]`, function () {
+					expect(Module.definitions[moduleName].getOrMakeArray(channelId)).to.eql(channelIds[channelId].return);
 				});
 			});
 		});
@@ -122,18 +197,6 @@ describe(`Functions in ${moduleName}.js`, function () {
 			arrays.forEach((array) => {
 				it(`for [${array}] should return itself`, function () {
 					expect(Module.definitions[moduleName].getOrMakeArray(array)).to.eql(array);
-				});
-			});
-		});
-	});
-	describe("paginate", function () {
-		const arrays = [["ch1"], ["ch1", "ch2"], ["ch1", "ch2", "ch3"], ["ch1", "ch2", "ch3", "ch4"], ["ch1", "ch2", "ch3", "ch4", "ch5"], ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6"], ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7"]];
-		arrays.forEach((array) => {
-			describe(`for [${array}]`, function () {
-				[1, 2, 3, 4, 5, 6].forEach((perPage) => {
-					it(`using ${perPage} per page, page 1 should return [${array.slice(0, perPage)}]`, function () {
-						expect(Module.definitions[moduleName].paginate(array, 1, perPage).items).to.eql(array.slice(0, perPage));
-					});
 				});
 			});
 		});
