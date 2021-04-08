@@ -50,5 +50,5 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           root_dir: ./MagicMirror/modules/MMM-YouTubeChannelStats
-          file: ./coverage/lcov.info
+          file: ./MagicMirror/modules/MMM-YouTubeChannelStats/coverage/lcov.info
           fail_ci_if_error: true
