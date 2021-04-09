@@ -1,4 +1,6 @@
+const chai = require("chai");
 const expect = require("chai").expect;
+const chaiAsPromised = require("chai-as-promised");
 const sinon = require("sinon");
 const moduleAlias = require("module-alias");
 moduleAlias.addAliases({ logger: "../../../js/logger.js" });
@@ -8,16 +10,16 @@ const moduleName = "MMM-YouTubeChannelStats";
 
 describe(`Functions in ${moduleName}.js`, function () {
 	Module = {};
-	Module.definitions = {};
-	Module.register = function (name, moduleDefinition) {
-		Module.definitions[name] = moduleDefinition;
-	};
 	const channelIds = {
 		channelid1: { return: ["channelid1"] },
 		"channelid1,channelid2": { return: ["channelid1", "channelid2"] },
 		"channelid1, channelid2": { return: ["channelid1", "channelid2"] }
 	};
 	before(function () {
+		Module.definitions = {};
+		Module.register = function (name, moduleDefinition) {
+			Module.definitions[name] = moduleDefinition;
+		};
 		require(`../${moduleName}.js`);
 		Module.definitions[moduleName].name = moduleName;
 		Module.definitions[moduleName].identifier = "module_1_" + moduleName;
@@ -26,6 +28,7 @@ describe(`Functions in ${moduleName}.js`, function () {
 		};
 		Module.definitions[moduleName].updateDom = function () {};
 		Module.clock = sinon.useFakeTimers(Date.now());
+		chai.use(chaiAsPromised);
 	});
 	after(function () {
 		Module.clock = sinon.restore();
@@ -122,7 +125,7 @@ describe(`Functions in ${moduleName}.js`, function () {
 		});
 		it(`for invalid 'apiKey' to be undefined`, function () {
 			Module.definitions[moduleName].config.apiKey = "blah";
-			//			expect(Module.definitions[moduleName].fetchData()).to.be.undefined;
+			//			expect(Module.definitions[moduleName].fetchData()).to.eventually.be.undefined;
 		});
 	});
 	describe("getParams", function () {
