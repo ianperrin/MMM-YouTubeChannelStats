@@ -5,7 +5,7 @@ Module.register("MMM-YouTubeChannelStats", {
 		apiKey: "",
 		stats: ["views", "subscribers", "videos"], // possible values "views", "comments", "subscribers", "videos"
 		showLabels: true,
-		showChannelThumbnail: true,
+		showChannelThumbnail: true, // display channel icon by default. Set to false to hide
 		grayscale: true,
 		maximumChannels: 0,
 		fetchInterval: 3600 * 1000, // 1 hour
