@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 - Code coverage support (`npm run test:coverage`)
 - Unit test coverage for inherited functions in the core module file.
+- Added `showChannelThumbnail` config option.
 
 ### Updated
 
