@@ -1,6 +1,8 @@
 {% if channelsList  %}
     {% for channel in channelsList %}
-    {% set thumbnail = channel.snippet.thumbnails["default"] %}
+    {% if config.showChannelThumbnail %}
+      {% set thumbnail = channel.snippet.thumbnails["default"] %}
+    {% endif %}
     <header class="module-header">{{ channel.snippet.title }}</header>
     <div class="small channel{{ " grayscale" if config.grayscale }}" style="background-image: url({{ thumbnail.url }}); min-height: {{ thumbnail.height }}px; min-width: {{ thumbnail.width }}px; padding-{{ position }}: {{ thumbnail.width }}px;">
         <ul class="fa-ul">
